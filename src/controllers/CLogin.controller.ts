@@ -17,7 +17,7 @@ export class CLoginController {
 
 
     // Method for logging in users
-    static async login(request: express.Request, response: express.Response, next: express.NextFunction) {
+   static async login(request: express.Request, response: express.Response, next: express.NextFunction) {
         try {
             console.log("In login() from CLoginController");
     
@@ -33,6 +33,7 @@ export class CLoginController {
                 );
             }
     
+            // Extract username or email
             const objFilteredLogin = CFilterRequest.filterLoginRequest(request);
             console.log("Login Input:", objFilteredLogin);
     
