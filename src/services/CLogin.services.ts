@@ -11,27 +11,33 @@ const objLoginModel = new CLoginModel();
 export class CLoginService {
 
      // Method for logging in users
-     static async login(request: LoginReq): Promise<ILoginResponse> {
+     
+    static async login(request: LoginReq): Promise<ILoginResponse> {
         try {
             console.log("Validating User from CLoginService");
     
-            const { username, password } = request;
-    
+            const { username, email, password } = request;
             console.log("Username:", username);
+            console.log("Email:", email);
             console.log("Password:", password);
     
-            if (!username || !password) {
+            // Ensure at least one of username or email is provided
+            if ((!username && !email) || !password) {
                 throw new CCustomErrors(
-                    new Error("Username/Email and Password are required"),
+                    new Error("Either Username or Email and Password are required"),
                     errorTypeEnum.INPUT_VALIDATION_ERROR,
                     []
                 );
             }
     
-            const existingUser = await objLoginModel.getUserDetails(username, password);
+            // Determine the identifier to use (username or email)
+            const identifier = username?.trim() || email?.trim();
+    
+            // Fetch user details
+            const existingUser = await objLoginModel.getUserDetails(identifier, password.trim());
     
             if (!existingUser) {
-                console.log("Invalid Username/Password");
+                console.log("Invalid Username/Email or Password");
                 throw new CCustomErrors(
                     new Error("Invalid Username/Email or Password"),
                     errorTypeEnum.INPUT_VALIDATION_ERROR,
@@ -41,6 +47,7 @@ export class CLoginService {
     
             console.log("User Found:", existingUser);
     
+            // Generate authentication token
             const token = objLoginModel.generateToken(existingUser.userId.toString());
     
             return {
@@ -53,8 +60,6 @@ export class CLoginService {
             throw error;
         }
     }
-    
-
 
 
     // Method for user logout
