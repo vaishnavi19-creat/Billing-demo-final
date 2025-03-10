@@ -15,29 +15,35 @@ export class CLoginModel {
         this.repository = AppDataSource.getRepository(CLoginEntities);
     }
 
-    public async getUserDetails(username: string, password: string): Promise<any> {
+    public async getUserDetails(identifier: string, password: string): Promise<any> { 
         try {
             console.log("Fetching user by username or email in CLoginModel");
+            console.log("Identifier (Username/Email):", identifier);
+            console.log("Password:", password);
     
             const user = await this.repository
                 .createQueryBuilder("users")
-                .where("(users.username = :username OR users.email = :username)", { username })
-                .andWhere("users.password LIKE BINARY :password", { password })
-
+                .where("users.username = :identifier", { identifier })
+                .orWhere("users.email = :identifier", { identifier })
+                .andWhere("users.password = :password", { password })
+                .printSql()  // Log the SQL query for debugging
                 .getOne();
     
-            console.log("User Found in DB:", user);
+            console.log("Generated SQL Query: ", user);
     
             if (user) {
+                console.log("User Found in DB:", user);
                 return user;
             }
     
+            console.log("User not found");
             return null;
         } catch (error) {
             console.log("Error in getUserDetails():", error);
             throw error;
         }
     }
+    
     
 
     
